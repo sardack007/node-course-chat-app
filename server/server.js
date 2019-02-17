@@ -9,6 +9,7 @@ const socketIO = require('socket.io');
 const http = require('http');
 
 const path = require('path');
+const {generateMessage} = require('./utils/message');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -21,21 +22,13 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
 
-  socket.emit('greetings', {for: 'Jim', text: 'welcome to the chat'});
+  socket.emit('greetings', generateMessage('Admin', 'Welcome to the chat app'));
 
-  socket.broadcast.emit('newMessage', {
-    from: 'Jim',
-    text: 'jim has joined',
-    createAt: new Date().getTime()
-  });
+  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
   socket.on('createMessage', (message) => {
     console.log('create a message', message);
-    // io.emit('newMessage', {
-    //   from: message.from,
-    //   text: message.text,
-    //   createAt: new Date().getTime()
-    // });
+    io.emit('newMessage', generateMessage(message.from, message.text));
 
     // envia el evento a los demas menos al que envio el evento
     // socket.broadcast.emit('newMessage', {
